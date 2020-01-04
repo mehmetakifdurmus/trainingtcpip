@@ -1,0 +1,3 @@
+build*
+client/client.pro.*
+server/server.pro.*

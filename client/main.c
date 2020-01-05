@@ -26,9 +26,10 @@ void* messenger(void* _socket)
         if (strcmp(buffer, "bye") == 0)
             break;
         fprintf(fp, "%s\n", buffer);
+        //        printf("Incoming Message: %s\n", buffer);
+        memset(buffer, 0x00, valread);
     }
     fclose (fp);
-    (void) valread;
     return NULL;
 }
 
@@ -37,13 +38,13 @@ int main()
     memset(buffer, 0x00, 1024);
     memset(name, 0x00, 8);
     printf("Enter your name here (8 character): ");
-    scanf("%s", name);
-//    while(strcmp(name, "exit") == 0)
-//    {
-//        memset(name, 0x00, 8);
-//        printf("Exit is reserved\nPlease enter another name here (8 character): ");
-//        scanf("%s", name);
-//    }
+    gets(name);
+    while(strcmp(name, "exit") == 0)
+    {
+        memset(name, 0x00, 8);
+        printf("Exit is reserved\nPlease enter another name here (8 character): ");
+        gets(name);
+    }
 
     int sock = 0;
     struct sockaddr_in serv_addr;
@@ -77,17 +78,85 @@ int main()
     char sender[1024];
     size_t sender_len = 0;
     memset(sender, 0x00, 1024);
+    char to[8];
+    memset(to, 0x00, 8);
 
     while(run)
     {
-        scanf("%s", sender);
-        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+        gets(sender);
+
+        //Leave
         if (strcmp(sender, "exit") == 0)
+        {
             run = 0;
-        sender_len = strlen(sender);
-        send(sock, sender, sender_len, 0);
-        memset(sender, 0x00, sender_len);
+            sender_len = strlen(sender);
+            send(sock, sender, sender_len, 0);
+        }
+        else
+        {
+            if(sender[0] == '/' && sender[1] == 'm')
+            {
+                int i = 0;
+                for(; i < 8; ++i)
+                {
+                    if(sender[3 + i] != ' ')
+                    {
+                        to[i] = sender[3 + i];
+                    }
+                    else
+                        break;
+                }
+                to[i] = 0;
+                printf("Your message to %s:%s, size:%ld\n", to, &sender[4 + i], strlen(&sender[4 + i]));
+                memset(to, 0x00, 8);
+            }
+            else
+                printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+
+            sender_len = strlen(sender);
+            send(sock, sender, sender_len, 0);
+            memset(sender, 0x00, sender_len);
+        }
     }
+
+    //debug
+    //    {
+    //        strcpy(sender, "Bir adam vardi");
+    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+    //        sender_len = strlen(sender);
+    //        send(sock, sender, sender_len, 0);
+    //        memset(sender, 0x00, sender_len);
+    //        usleep(200);
+
+    //        strcpy(sender, "cani sikilan.");
+    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+    //        sender_len = strlen(sender);
+    //        send(sock, sender, sender_len, 0);
+    //        memset(sender, 0x00, sender_len);
+    //        usleep(200);
+
+    //        strcpy(sender, "Turkcellim geldi.");
+    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+    //        sender_len = strlen(sender);
+    //        send(sock, sender, sender_len, 0);
+    //        memset(sender, 0x00, sender_len);
+    //        usleep(200);
+
+    //        strcpy(sender, "tum sikinti bitti.");
+    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+    //        sender_len = strlen(sender);
+    //        send(sock, sender, sender_len, 0);
+    //        memset(sender, 0x00, sender_len);
+    //        usleep(200);
+
+    //        strcpy(sender, "exit");
+    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
+    //        sender_len = strlen(sender);
+    //        send(sock, sender, sender_len, 0);
+    //        memset(sender, 0x00, sender_len);
+    //        usleep(200);
+
+    //    }
     pthread_join(messenger_thread, NULL);
 
     return 0;

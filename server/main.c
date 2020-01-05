@@ -15,8 +15,8 @@ void handle_signal(int sig)
     if(sig == SIGINT)
     {
         printf("\nCaught signal SIGINT\nClosing server...\n");
-        //    pthread_mutex_unlock(&mutex);
         accepterClose();
+        pthread_mutex_unlock(&mutex);
     }
 }
 
@@ -27,7 +27,7 @@ int main()
     signal(SIGINT, handle_signal);
     initServer();
 
-    //    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex);
     /*
     {
         //stop threads

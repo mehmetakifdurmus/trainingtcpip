@@ -103,10 +103,10 @@ void initServer()
     head = initClientList();
     strcpy(head->client, "HEAD");
 
-    //    pthread_t accepter_thread;
-    //    pthread_create(&accepter_thread, NULL, &accepter, NULL);
+        pthread_t accepter_thread;
+        pthread_create(&accepter_thread, NULL, &accepter, NULL);
     //debug
-    accepter();
+//    accepter();
 
 }
 
@@ -136,9 +136,9 @@ void* accepter()
                 }
                 else
                 {
-                    //            pthread_create(&client_ptr->thread, NULL, &messenger, (void*) client_ptr);
+                                pthread_create(&client_ptr->thread, NULL, &messenger, (void*) client_ptr);
                     //debug
-                    messenger(client_ptr);
+//                    messenger(client_ptr);
                 }
 
             }
@@ -169,6 +169,8 @@ void* messenger(void* _clientnode)
 {
     clientnode* client_ptr = (clientnode*) _clientnode;
     char buffer[1024];
+    char to[8];
+    memset(to, 0x00, 8);
     memset(buffer, 0x00, 1024);
     long valread;
     printf("%s has entered the chat.\n", client_ptr->client);
@@ -188,25 +190,45 @@ void* messenger(void* _clientnode)
         }
         else
         {
-            clientnode* ptr = head->next;
+            clientnode* ptr = head->next;            
             if(buffer[0] == '/' && buffer[1] == 'm')
             {
-                printf("%s : %s, size : %ld\n", client_ptr->client, buffer, strlen(buffer));
+                int i = 0;
+                for(; i < 8; ++i)
+                {
+                    if(buffer[3 + i] != ' ')
+                    {
+                        to[i] = buffer[3 + i];
+                    }
+                    else
+                        break;
+                }
+                to[i] = 0;
+                printf("%s to %s : %s, size : %ld\n", client_ptr->client, to, &buffer[4 + i], strlen(&buffer[4 + i]));
+
+                while(ptr != NULL)
+                {
+                    if(strcmp(ptr->client, to) != 0)
+                    {
+                        ptr = ptr->next;
+                        continue;
+                    }
+                    send(ptr->socket , &buffer[4 + i], strlen(&buffer[4 + i]), 0);
+                    ptr = ptr->next;
+                }
+                memset(to, 0x00, 8);
             }
             else
             {
+                printf("%s : %s, size : %ld\n", client_ptr->client, buffer, strlen(buffer));
                 while(ptr != NULL)
                 {
-//                    if(ptr == client_ptr)
-//                    {
-//                        ptr = ptr->next;
-//                        continue;
-//                    }
-//                    else
-//                    {
-//                        send(ptr->socket , &buffer[3], strlen(&buffer[3]) , 0);
-//                    }
-                    send(ptr->socket , &buffer[3], strlen(&buffer[3]) , 0);
+                    if(ptr == client_ptr)
+                    {
+                        ptr = ptr->next;
+                        continue;
+                    }
+                    send(ptr->socket, buffer, strlen(buffer), 0);
                     ptr = ptr->next;
                 }
             }

@@ -1,12 +1,13 @@
 TEMPLATE = app
-CONFIG += console
 CONFIG -= app_bundle
+CONFIG += console
 CONFIG -= qt
 
 SOURCES += \
-        main.c
+        main.c \
+        server.c
 
 HEADERS += \
-    threadlist.h
+    server.h
 
 LIBS += -lpthread

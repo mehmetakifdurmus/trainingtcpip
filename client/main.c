@@ -7,7 +7,7 @@
 #include <pthread.h>
 #define PORT 1337
 
-int work = 1;
+int run = 1;
 char buffer[1024];
 char name[8];
 
@@ -20,7 +20,7 @@ void* messenger(void* _socket)
     strcpy(&filename[10], name);
     FILE * fp;
     fp = fopen (filename,"w");
-    while(work)
+    while(run)
     {
         valread = read(socket , buffer, 1024);
         if (strcmp(buffer, "bye") == 0)
@@ -34,9 +34,17 @@ void* messenger(void* _socket)
 
 int main()
 {
-    buffer[0] = 0;
+    memset(buffer, 0x00, 1024);
+    memset(name, 0x00, 8);
     printf("Enter your name here (8 character): ");
     scanf("%s", name);
+//    while(strcmp(name, "exit") == 0)
+//    {
+//        memset(name, 0x00, 8);
+//        printf("Exit is reserved\nPlease enter another name here (8 character): ");
+//        scanf("%s", name);
+//    }
+
     int sock = 0;
     struct sockaddr_in serv_addr;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -61,32 +69,25 @@ int main()
         return -1;
     }
 
-
-
     send(sock , name , strlen(name) , 0);
-
 
     pthread_t messenger_thread;
     pthread_create(&messenger_thread, NULL, &messenger, (void*) &sock);
 
     char sender[1024];
+    size_t sender_len = 0;
+    memset(sender, 0x00, 1024);
 
-    while(work)
+    while(run)
     {
         scanf("%s", sender);
+        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
         if (strcmp(sender, "exit") == 0)
-            work = 0;
-        send(sock ,sender ,strlen(sender) , 0);
-        sender[0] = '\0';
+            run = 0;
+        sender_len = strlen(sender);
+        send(sock, sender, sender_len, 0);
+        memset(sender, 0x00, sender_len);
     }
-//    strcpy(sender, "/bWtf");
-//    printf("%s\n", sender);
-//    send(sock ,sender ,strlen(sender) , 0);
-//    sender[0] = 0;
-//    strcpy(sender, "exit");
-//    work = 0;
-//    send(sock ,sender ,strlen(sender) , 0);
-
     pthread_join(messenger_thread, NULL);
 
     return 0;

@@ -15,21 +15,19 @@ void* messenger(void* _socket)
 {
     int socket = *((int*) _socket);
     long valread;
-    char filename[18];
-    strcpy(filename, "/home/mad/");
-    strcpy(&filename[10], name);
-    FILE * fp;
-    fp = fopen (filename,"w");
     while(run)
     {
         valread = read(socket , buffer, 1024);
+        if (valread <= 0)
+        {
+            run = 0;
+            break;
+        }
         if (strcmp(buffer, "bye") == 0)
             break;
-        fprintf(fp, "%s\n", buffer);
-        //        printf("Incoming Message: %s\n", buffer);
+        printf("Incoming Message: %s\n", buffer);
         memset(buffer, 0x00, valread);
     }
-    fclose (fp);
     return NULL;
 }
 
@@ -118,45 +116,6 @@ int main()
             memset(sender, 0x00, sender_len);
         }
     }
-
-    //debug
-    //    {
-    //        strcpy(sender, "Bir adam vardi");
-    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
-    //        sender_len = strlen(sender);
-    //        send(sock, sender, sender_len, 0);
-    //        memset(sender, 0x00, sender_len);
-    //        usleep(200);
-
-    //        strcpy(sender, "cani sikilan.");
-    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
-    //        sender_len = strlen(sender);
-    //        send(sock, sender, sender_len, 0);
-    //        memset(sender, 0x00, sender_len);
-    //        usleep(200);
-
-    //        strcpy(sender, "Turkcellim geldi.");
-    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
-    //        sender_len = strlen(sender);
-    //        send(sock, sender, sender_len, 0);
-    //        memset(sender, 0x00, sender_len);
-    //        usleep(200);
-
-    //        strcpy(sender, "tum sikinti bitti.");
-    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
-    //        sender_len = strlen(sender);
-    //        send(sock, sender, sender_len, 0);
-    //        memset(sender, 0x00, sender_len);
-    //        usleep(200);
-
-    //        strcpy(sender, "exit");
-    ////        printf("Your message:%s, size:%ld\n", sender, strlen(sender));
-    //        sender_len = strlen(sender);
-    //        send(sock, sender, sender_len, 0);
-    //        memset(sender, 0x00, sender_len);
-    //        usleep(200);
-
-    //    }
     pthread_join(messenger_thread, NULL);
 
     return 0;

@@ -4,8 +4,6 @@
 #include "server.h"
 #include <signal.h>
 
-pthread_mutex_t mutex;
-
 void handle_signal(int sig)
 {
     //unused

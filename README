@@ -1,2 +1,2 @@
 My personal attempt for Tcp/Ip chat program and it is written in C.
-For further development, developer should look at  Blocking and Non-blocking (Wouldblock), TCP Delay (Nagle's algorithm), serialization and crypto.
+For further development, developer should look at  Blocking and Non-blocking (Wouldblock), TCP Delay (Nagle's algorithm), serialization (7Bit Int) and crypto.

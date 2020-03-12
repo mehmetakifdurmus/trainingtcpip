@@ -12,10 +12,10 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 
-static int run = 1;
+extern int run;
 
-static int server_fd, addrlen;
-static struct sockaddr_in address;
+extern int server_fd, addrlen;
+extern struct sockaddr_in address;
 
 typedef struct _clientnode
 {
@@ -33,6 +33,7 @@ void removeClient(clientnode* _head, const char* _client);
 void clearClientList(clientnode* _head);
 void printClient(clientnode* _head);
 void initServer();
+void terminateServer();
 void* accepter();
 void accepterClose();
 void* messenger(void* _clientnode);

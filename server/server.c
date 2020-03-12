@@ -1,9 +1,9 @@
 #include "server.h"
 
-extern int run;
+int run = true;
 
-extern int server_fd, addrlen;
-extern struct sockaddr_in address;
+int server_fd, addrlen;
+struct sockaddr_in address;
 
 clientnode* initClientList()
 {
@@ -87,14 +87,15 @@ void initServer()
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
 
-    // Forcefully attaching socket to the port 8080
     if (bind(server_fd, (struct sockaddr *)&address,
              sizeof(address))<0)
     {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    if (listen(server_fd, 3) < 0)
+    //-1 is max for backlog count,
+    //when this count overflows, next request is always refused, if you do not call accept.
+    if (listen(server_fd, -1) < 0)
     {
         perror("listen");
         exit(EXIT_FAILURE);
@@ -102,12 +103,15 @@ void initServer()
 
     head = initClientList();
     strcpy(head->client, "HEAD");
+//    pthread_t accepter_thread;
+//    pthread_create(&accepter_thread, NULL, &accepter, NULL);
+    accepter();
+}
 
-        pthread_t accepter_thread;
-        pthread_create(&accepter_thread, NULL, &accepter, NULL);
-    //debug
-//    accepter();
-
+void terminateServer()
+{
+    run = false;
+    close(server_fd);
 }
 
 void* accepter()
@@ -146,23 +150,6 @@ void* accepter()
 
     }
     return NULL;
-}
-
-void accepterClose()
-{
-    int sock = 0;
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        printf("\n Socket creation error \n");
-        return;
-    }
-
-    if (connect(sock, (struct sockaddr *)&address, sizeof(address)) < 0)
-    {
-        printf("\nConnection Failed \n");
-        return;
-    }
-    send(sock , "exit", 5, 0);
 }
 
 void* messenger(void* _clientnode)

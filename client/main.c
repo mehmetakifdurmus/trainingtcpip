@@ -21,7 +21,8 @@ void* messenger(void* _socket)
         if (valread <= 0)
         {
             run = 0;
-            break;
+            printf("Server is closed: %d \n", valread);
+            exit(0);
         }
         if (strcmp(buffer, "bye") == 0)
             break;

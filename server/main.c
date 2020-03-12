@@ -4,10 +4,7 @@
 #include "server.h"
 #include <signal.h>
 
-static pthread_mutex_t mutex;
-extern int run;
-
-extern clientnode* head;
+pthread_mutex_t mutex;
 
 void handle_signal(int sig)
 {
@@ -15,34 +12,17 @@ void handle_signal(int sig)
     if(sig == SIGINT)
     {
         printf("\nCaught signal SIGINT\nClosing server...\n");
-        accepterClose();
-        pthread_mutex_unlock(&mutex);
+        exit(0);
     }
 }
 
 int main()
 {
-    pthread_mutex_init(&mutex, NULL);
-    pthread_mutex_lock(&mutex);
     signal(SIGINT, handle_signal);
     initServer();
 
-    pthread_mutex_lock(&mutex);
-    /*
-    {
-        //stop threads
-        clientnode* current = head;
-        clientnode* tmp;
-        while (current->next != NULL || current == NULL)
-        {
-            tmp = current->next;
-            pthread_cancel(current->thread);
-            current = tmp;
-        }
-
-    }
-*/
+    //Server cannot know the crash!
+    //this function is useless
     clearClientList(head);
-
     return 0;
 }
